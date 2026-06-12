@@ -7,7 +7,7 @@ from rest_framework import status
 from products.models import Product
 from .models import Order, OrderItem, Payment
 from .serializers import CreateOrderSerializer, OrderSerializer
-
+from django.core.cache import cache
 
 @api_view(["POST"])
 def create_order(request):
@@ -61,6 +61,8 @@ def create_order(request):
             product.stock_quantity -= quantity
             product.version += 1
             product.save()
+            # Clear products cache only after the transaction succeeds.
+            transaction.on_commit(lambda: cache.delete("active_products"))
 
             order = Order.objects.create(
                 user=user,
