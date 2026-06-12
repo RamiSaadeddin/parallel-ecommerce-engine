@@ -1,3 +1,17 @@
-from django.shortcuts import render
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
-# Create your views here.
+from .models import Product
+from .serializers import ProductSerializer
+
+
+@api_view(["GET"])
+def product_list(request):
+    products = Product.objects.filter(is_active=True)
+    serializer = ProductSerializer(products, many=True)
+
+    return Response({
+        "message": "Products fetched successfully",
+        "count": products.count(),
+        "data": serializer.data,
+    })
