@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderItem, Payment, Invoice
+from .models import Order, OrderItem, Payment, Invoice, DailySalesReport
 
 
 class OrderItemInline(admin.TabularInline):
@@ -22,3 +22,17 @@ class PaymentAdmin(admin.ModelAdmin):
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
     list_display = ["id", "order", "invoice_number", "generated_at"]
+
+
+@admin.register(DailySalesReport)
+class DailySalesReportAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "report_date",
+        "total_orders",
+        "total_sales",
+        "processed_chunks",
+        "chunk_size",
+        "generated_at",
+    ]
+    list_filter = ["report_date"]

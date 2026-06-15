@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Invoice, Order, OrderItem, Payment
+from .models import Invoice, Order, OrderItem, Payment, DailySalesReport
 
 
 class CreateOrderSerializer(serializers.Serializer):
@@ -61,3 +61,17 @@ class OrderSerializer(serializers.ModelSerializer):
             "invoice",
             "created_at",
         ]
+        
+class DailySalesReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailySalesReport
+        fields = [
+            "id",
+            "report_date",
+            "total_orders",
+            "total_sales",
+            "processed_chunks",
+            "chunk_size",
+            "generated_at",
+            "created_at",
+        ]        

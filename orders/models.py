@@ -71,7 +71,10 @@ class Payment(models.Model):
         related_name="payment",
     )
 
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+    )
 
     status = models.CharField(
         max_length=20,
@@ -92,8 +95,36 @@ class Invoice(models.Model):
         related_name="invoice",
     )
 
-    invoice_number = models.CharField(max_length=100, unique=True)
+    invoice_number = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+
     generated_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.invoice_number
+
+
+class DailySalesReport(models.Model):
+    report_date = models.DateField(unique=True)
+
+    total_orders = models.PositiveIntegerField(default=0)
+
+    total_sales = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
+
+    processed_chunks = models.PositiveIntegerField(default=0)
+    chunk_size = models.PositiveIntegerField(default=50)
+
+    generated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-report_date"]
+
+    def __str__(self):
+        return f"Daily Sales Report - {self.report_date}"

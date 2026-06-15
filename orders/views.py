@@ -4,10 +4,14 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from products.models import Product
-from .models import Order, OrderItem, Payment
-from .serializers import CreateOrderSerializer, OrderSerializer
+from .models import DailySalesReport, Order, OrderItem, Payment
+from .serializers import (
+    CreateOrderSerializer,
+    DailySalesReportSerializer,
+    OrderSerializer,
+)
 from django.core.cache import cache
-from .tasks import generate_invoice_task
+from .tasks import generate_invoice_task, process_daily_sales_report_task
 from celery import shared_task
 @api_view(["POST"])
 def create_order(request):
@@ -119,6 +123,56 @@ def order_list(request):
         {
             "message": "Orders fetched successfully",
             "count": orders.count(),
+            "data": serializer.data,
+        }
+    )
+@api_view(["POST"])
+def process_daily_sales(request):
+    report_date = request.data.get("report_date")
+    chunk_size = request.data.get("chunk_size", 50)
+
+    try:
+        chunk_size = int(chunk_size)
+
+        if chunk_size <= 0:
+            return Response(
+                {
+                    "message": "chunk_size must be greater than 0",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    except ValueError:
+        return Response(
+            {
+                "message": "chunk_size must be a valid number",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    task = process_daily_sales_report_task.delay(
+        report_date=report_date,
+        chunk_size=chunk_size,
+    )
+
+    return Response(
+        {
+            "message": "Daily sales batch processing started",
+            "task_id": task.id,
+            "report_date": report_date or "today",
+            "chunk_size": chunk_size,
+        },
+        status=status.HTTP_202_ACCEPTED,
+    )
+@api_view(["GET"])
+def daily_sales_reports(request):
+    reports = DailySalesReport.objects.all()
+    serializer = DailySalesReportSerializer(reports, many=True)
+
+    return Response(
+        {
+            "message": "Daily sales reports fetched successfully",
+            "count": reports.count(),
             "data": serializer.data,
         }
     )
