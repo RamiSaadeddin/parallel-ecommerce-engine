@@ -3,12 +3,12 @@ from django.db import transaction
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
 from products.models import Product
 from .models import Order, OrderItem, Payment
 from .serializers import CreateOrderSerializer, OrderSerializer
 from django.core.cache import cache
-
+from .tasks import generate_invoice_task
+from celery import shared_task
 @api_view(["POST"])
 def create_order(request):
     serializer = CreateOrderSerializer(data=request.data)
@@ -82,6 +82,13 @@ def create_order(request):
                 amount=total_amount,
                 status=Payment.Status.SUCCESS,
             )
+
+            # Queue invoice generation only after the database transaction succeeds.
+            # This keeps invoice generation outside the main request path.
+            transaction.on_commit(
+    lambda: generate_invoice_task.delay(order.id),
+    robust=True,
+)
 
     except Product.DoesNotExist:
         return Response(

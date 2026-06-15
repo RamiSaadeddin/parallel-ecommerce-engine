@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Order, OrderItem, Payment
+from .models import Invoice, Order, OrderItem, Payment
 
 
 class CreateOrderSerializer(serializers.Serializer):
@@ -33,9 +33,20 @@ class PaymentSerializer(serializers.ModelSerializer):
         ]
 
 
+class InvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invoice
+        fields = [
+            "id",
+            "invoice_number",
+            "generated_at",
+        ]
+
+
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     payment = PaymentSerializer(read_only=True)
+    invoice = InvoiceSerializer(read_only=True)
     username = serializers.CharField(source="user.username", read_only=True)
 
     class Meta:
@@ -47,5 +58,6 @@ class OrderSerializer(serializers.ModelSerializer):
             "total_amount",
             "items",
             "payment",
+            "invoice",
             "created_at",
         ]
