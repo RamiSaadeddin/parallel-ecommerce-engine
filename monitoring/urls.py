@@ -3,6 +3,8 @@ from django.urls import path
 from .views import (
     load_balance_logs,
     performance_logs,
+    resource_limited_task,
+    resource_usage_logs,
     simulate_load_balanced_order,
 )
 
@@ -14,4 +16,14 @@ urlpatterns = [
         name="load-balanced-order",
     ),
     path("load-balance-logs/", load_balance_logs, name="load-balance-logs"),
+    path(
+        "resource-limited-task/",
+        resource_limited_task,
+        name="resource-limited-task",
+    ),
+    path(
+        "resource-usage-logs/",
+        resource_usage_logs,
+        name="resource-usage-logs",
+    ),
 ]

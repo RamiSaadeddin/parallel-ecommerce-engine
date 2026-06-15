@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import LoadBalanceLog, PerformanceLog
+from .models import LoadBalanceLog, PerformanceLog, ResourceUsageLog
 
 
 @admin.register(PerformanceLog)
@@ -26,3 +26,17 @@ class LoadBalanceLogAdmin(admin.ModelAdmin):
         "created_at",
     ]
     list_filter = ["strategy", "handled_by"]
+
+
+@admin.register(ResourceUsageLog)
+class ResourceUsageLogAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "resource_name",
+        "status",
+        "current_usage",
+        "max_capacity",
+        "message",
+        "created_at",
+    ]
+    list_filter = ["resource_name", "status"]
