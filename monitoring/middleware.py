@@ -9,6 +9,12 @@ class PerformanceMonitoringMiddleware:
 
     It wraps API requests, measures response time, and stores the result.
     This keeps performance monitoring separate from the business logic.
+
+    During benchmarks, logging can be skipped by sending:
+    X-Skip-Performance-Log: true
+
+    This helps us measure the real endpoint performance without adding
+    extra PostgreSQL writes from the monitoring system.
     """
 
     def __init__(self, get_response):
@@ -23,9 +29,15 @@ class PerformanceMonitoringMiddleware:
         response_time_ms = (end_time - start_time) * 1000
 
         try:
+            skip_performance_log = (
+                request.headers.get("X-Skip-Performance-Log", "").lower()
+                == "true"
+            )
+
             should_log = (
                 request.path.startswith("/api/")
                 and not request.path.startswith("/api/monitoring/")
+                and not skip_performance_log
             )
 
             if should_log:
@@ -35,6 +47,7 @@ class PerformanceMonitoringMiddleware:
                     response_time_ms=round(response_time_ms, 2),
                     status_code=response.status_code,
                 )
+
         except Exception:
             # Monitoring should never break the main application.
             pass
