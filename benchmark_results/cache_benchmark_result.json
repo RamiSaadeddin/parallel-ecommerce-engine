@@ -1,0 +1,27 @@
+{
+    "endpoint": "http://127.0.0.1:8000/api/products/",
+    "request_count_per_test": 50,
+    "before_redis": {
+        "requests": 50,
+        "average_ms": 156.26,
+        "median_ms": 137.61,
+        "min_ms": 104.17,
+        "max_ms": 256.65,
+        "sources": [
+            "postgresql_database"
+        ],
+        "failed_requests": 0
+    },
+    "after_redis": {
+        "requests": 50,
+        "average_ms": 92.41,
+        "median_ms": 84.73,
+        "min_ms": 53.35,
+        "max_ms": 206.27,
+        "sources": [
+            "redis_cache"
+        ],
+        "failed_requests": 0
+    },
+    "improvement_percentage": 40.86
+}
